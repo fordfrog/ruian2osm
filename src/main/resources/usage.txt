@@ -1,0 +1,17 @@
+Usage: java -jar ruian2osm-*-jar-with-dependencies.jar --db-connection-url <value>
+    [--bbox <value>] [--print-stats] [--update] [--log-file <value>]
+
+Where:
+--bbox
+        bounding box of area that should be processed (if not specified, whole
+        country is processed)
+--db-connection-url
+        is JDBC connection URL, for example:
+        jdbc:postgresql://localhost/ruian?user=ruian&password=p4ssw0rd
+--log-file
+        is optional specification of log file (if not specified, log will be
+        output to console)
+--print-stats
+        prints statistic about differences between RÚIAN data and OSM data
+--update
+        updates OSM data (that is it writes the changes to the OSM API)
