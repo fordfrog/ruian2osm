@@ -64,6 +64,8 @@ public class Processor {
                     MessageFormat.format("Using bounding box {0}", useBBox));
             final List<AddressNode> osmNodes =
                     OsmLoader.loadNodes(useBBox, logFile);
+            final List<AddressNode> ruianNodes =
+                    RuianLoader.loadNodes(bbox, con, logFile);
         } catch (final SQLException ex) {
             throw new RuntimeException(
                     "Problem occurred while communicating with database", ex);
