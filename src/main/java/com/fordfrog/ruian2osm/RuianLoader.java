@@ -121,6 +121,7 @@ public class RuianLoader {
                     node.setStreetNumber(streetNumber);
                     node.setIsIn(buildIsIn(node.getCity(), rs.getString(
                             "vusc_name"), node.getCountry()));
+                    node.setDeleted(rs.getBoolean("deleted"));
 
                     switch (rs.getInt("typ_kod")) {
                         case 1:

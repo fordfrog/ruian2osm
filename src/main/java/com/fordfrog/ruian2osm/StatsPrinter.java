@@ -57,7 +57,9 @@ public class StatsPrinter {
         final List<AddressNodePair> matchedPairs =
                 new ArrayList<>(pairs.size());
         int matchedCount = 0;
+        int matchedRuianDeleted = 0;
         int notMatchedRuianCount = 0;
+        int notMatchedRuianDeletedCount = 0;
         int notMatchedOsmCount = 0;
         double totalDistance = 0;
         Double minDistance = null;
@@ -72,6 +74,10 @@ public class StatsPrinter {
             if (osmNode != null && ruianNode != null) {
                 matchedCount++;
                 matchedPairs.add(pair);
+
+                if (ruianNode.isDeleted()) {
+                    matchedRuianDeleted++;
+                }
 
                 final double distance =
                         osmNode.getPoint().distance(ruianNode.getPoint());
@@ -92,15 +98,23 @@ public class StatsPrinter {
             } else if (ruianNode != null) {
                 notMatchedRuianCount++;
                 notMatchedRuian.add(ruianNode);
+
+                if (ruianNode.isDeleted()) {
+                    notMatchedRuianDeletedCount++;
+                }
             }
         }
 
         Utils.printToLog(logFile,
                 MessageFormat.format("Total nodes: {0}", pairs.size()));
-        Utils.printToLog(logFile,
-                MessageFormat.format("Total matched nodes: {0}", matchedCount));
+        Utils.printToLog(logFile, MessageFormat.format("Total matched nodes: "
+                + "{0} ({1} of RÚIAN nodes are marked as deleted)",
+                matchedCount, matchedRuianDeleted));
         Utils.printToLog(logFile, MessageFormat.format(
                 "Total unmatched OSM nodes: {0}", notMatchedOsmCount));
+        Utils.printToLog(logFile, MessageFormat.format("Total unmatched RÚIAN "
+                + "nodes: {0} ({1} of these are marked as deleted)",
+                notMatchedRuianCount, notMatchedRuianDeletedCount));
         Utils.printToLog(logFile, MessageFormat.format(
                 "Total unmatched RÚIAN nodes: {0}", notMatchedRuianCount));
         Utils.printToLog(logFile, MessageFormat.format(

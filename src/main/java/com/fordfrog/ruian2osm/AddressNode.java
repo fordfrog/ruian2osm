@@ -29,6 +29,11 @@ package com.fordfrog.ruian2osm;
 public class AddressNode extends Node {
 
     /**
+     * Flag determining whether the node is marked as deleted.
+     */
+    private boolean deleted;
+
+    /**
      * Returns country.
      *
      * @return country code or null
@@ -293,6 +298,24 @@ public class AddressNode extends Node {
     }
 
     /**
+     * Getter for {@link #deleted}.
+     *
+     * @return {@link #deleted}
+     */
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    /**
+     * Setter for {@link #deleted}.
+     *
+     * @param deleted {@link #deleted}
+     */
+    public void setDeleted(final boolean deleted) {
+        this.deleted = deleted;
+    }
+
+    /**
      * Returns address information.
      *
      * @return address information
@@ -308,6 +331,10 @@ public class AddressNode extends Node {
         sbString.append(getStreet());
         sbString.append(' ');
         sbString.append(getHouseNumber());
+
+        if (deleted) {
+            sbString.append(" DELETED");
+        }
 
         return sbString.toString();
     }
