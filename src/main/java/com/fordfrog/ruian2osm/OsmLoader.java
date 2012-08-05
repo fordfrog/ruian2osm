@@ -90,8 +90,8 @@ public class OsmLoader {
                     throw new RuntimeException("Request URL is not valid", ex);
                 }
 
-                Utils.printToLog(logFile, MessageFormat.format("Loading nodes "
-                        + "from boudning box {0} (tile {1},{2})", curBBox,
+                Utils.printToLog(logFile, MessageFormat.format("Loading OSM "
+                        + "nodes from bounding box {0} (tile {1},{2})", curBBox,
                         xIndex, yIndex));
                 loadNodes(nodes, loadedIds, url);
                 Utils.printToLog(logFile, MessageFormat.format(
