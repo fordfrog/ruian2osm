@@ -23,6 +23,7 @@ package com.fordfrog.ruian2osm;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.postgis.Point;
 
 /**
  * OSM node.
@@ -40,13 +41,9 @@ public class Node {
      */
     private int id;
     /**
-     * Latitude of the node.
+     * Location of the node.
      */
-    private double lat;
-    /**
-     * Longitude of the node.
-     */
-    private double lon;
+    private Point point;
     /**
      * Version of the node.
      */
@@ -75,39 +72,21 @@ public class Node {
     }
 
     /**
-     * Getter for {@link #lat}.
+     * Getter for {@link #point}.
      *
-     * @return {@link #lat}
+     * @return {@link #point}
      */
-    public double getLat() {
-        return lat;
+    public Point getPoint() {
+        return point;
     }
 
     /**
-     * Setter for {@link #lat}.
+     * Setter for {@link #point}.
      *
-     * @param lat {@link #lat}
+     * @param point {@link #point}
      */
-    public void setLat(final double lat) {
-        this.lat = lat;
-    }
-
-    /**
-     * Getter for {@link #lon}.
-     *
-     * @return {@link #lon}
-     */
-    public double getLon() {
-        return lon;
-    }
-
-    /**
-     * Setter for {@link #lon}.
-     *
-     * @param lon {@link #lon}
-     */
-    public void setLon(final double lon) {
-        this.lon = lon;
+    public void setPoint(final Point point) {
+        this.point = point;
     }
 
     /**

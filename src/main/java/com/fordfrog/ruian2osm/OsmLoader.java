@@ -33,6 +33,7 @@ import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import org.postgis.PGbox2d;
+import org.postgis.Point;
 
 /**
  * Loads nodes from OSM overpass API.
@@ -203,9 +204,12 @@ public class OsmLoader {
             throws XMLStreamException {
         final Node node = new Node();
 
+        final Point point = new Point(
+                Double.parseDouble(reader.getAttributeValue(null, "lon")),
+                Double.parseDouble(reader.getAttributeValue(null, "lat")));
+
         node.setId(Integer.parseInt(reader.getAttributeValue(null, "id")));
-        node.setLat(Double.parseDouble(reader.getAttributeValue(null, "lat")));
-        node.setLon(Double.parseDouble(reader.getAttributeValue(null, "lon")));
+        node.setPoint(point);
         node.setVersion(
                 Integer.parseInt(reader.getAttributeValue(null, "version")));
         node.setUser(reader.getAttributeValue(null, "user"));
