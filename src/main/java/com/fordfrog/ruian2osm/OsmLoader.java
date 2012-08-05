@@ -93,8 +93,8 @@ public class OsmLoader {
                         + "from boudning box {0} (tile {1},{2})", curBBox,
                         xIndex, yIndex));
                 loadNodes(nodes, loadedIds, url);
-                Utils.printToLog(logFile,
-                        MessageFormat.format("Loaded {0} nodes", nodes.size()));
+                Utils.printToLog(logFile, MessageFormat.format(
+                        "Loaded {0} OSM nodes", nodes.size()));
             }
         }
 
