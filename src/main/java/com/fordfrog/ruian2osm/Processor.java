@@ -29,7 +29,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.MessageFormat;
 import org.postgis.PGbox2d;
-import org.postgis.PGgeometry;
 import org.postgresql.PGConnection;
 
 /**
@@ -62,6 +61,7 @@ public class Processor {
             final PGbox2d useBBox = bbox == null ? getBBox(con) : bbox;
             Utils.printToLog(logFile,
                     MessageFormat.format("Using bounding box {0}", useBBox));
+            Loader.loadNodes(useBBox, logFile);
         } catch (final SQLException ex) {
             throw new RuntimeException(
                     "Problem occurred while communicating with database", ex);

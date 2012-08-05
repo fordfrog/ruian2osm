@@ -23,6 +23,9 @@ package com.fordfrog.ruian2osm;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.sql.SQLException;
+import java.text.MessageFormat;
+import org.postgis.PGbox2d;
 
 /**
  * Various utility methods.
@@ -49,6 +52,28 @@ public class Utils {
             logFile.write('\n');
         } catch (final IOException ex) {
             throw new RuntimeException("Failed to write to log", ex);
+        }
+    }
+
+    /**
+     * Creates new PGbox2d.
+     *
+     * @param llbx LLB x
+     * @param llby LLB y
+     * @param urtx URT x
+     * @param urty URT y
+     *
+     * @return created box
+     */
+    public static PGbox2d createPGbox2d(final double llbx, final double llby,
+            final double urtx, final double urty) {
+        try {
+            return new PGbox2d(MessageFormat.format(
+                    "SRID=4326;BOX({0} {1},{2} {3})", Double.toString(llbx),
+                    Double.toString(llby), Double.toString(urtx),
+                    Double.toString(urty)));
+        } catch (final SQLException ex) {
+            throw new RuntimeException("Failed to create PGbox2d", ex);
         }
     }
 }
