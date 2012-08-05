@@ -200,8 +200,8 @@ public class AddressNodesMatcher {
                 continue;
             }
 
-            final AddressNode matchedRuianNode =
-                    getClosestNodeByNumber(osmNode, nodes, matchMaxDistance);
+            final AddressNode matchedRuianNode = getClosestNodeByNumber(
+                    osmNode, nodes, matchMaxDistance, logFile);
 
             if (matchedRuianNode == null) {
                 continue;
@@ -259,8 +259,8 @@ public class AddressNodesMatcher {
                 continue;
             }
 
-            final AddressNode matchedRuianNode =
-                    getClosestNodeByNumber(osmNode, nodes, matchMaxDistance);
+            final AddressNode matchedRuianNode = getClosestNodeByNumber(
+                    osmNode, nodes, matchMaxDistance, logFile);
 
             if (matchedRuianNode == null) {
                 continue;
@@ -300,7 +300,7 @@ public class AddressNodesMatcher {
             final AddressNode osmNode = osmLeftNodes.get(i);
 
             final AddressNode matchedRuianNode = getClosestNodeByNumber(
-                    osmNode, ruianLeftNodes, matchMaxDistance);
+                    osmNode, ruianLeftNodes, matchMaxDistance, logFile);
 
             if (matchedRuianNode == null) {
                 continue;
@@ -324,11 +324,13 @@ public class AddressNodesMatcher {
      * @param osmNode          OSM node
      * @param ruianNodes       list of RÚIAN nodes
      * @param matchMaxDistance maximum allowed distance for matching
+     * @param logFile          log file writer
      *
      * @return matched RÚIAN node or null
      */
     private static AddressNode getClosestNodeByNumber(final AddressNode osmNode,
-            final List<AddressNode> ruianNodes, final double matchMaxDistance) {
+            final List<AddressNode> ruianNodes, final double matchMaxDistance,
+            final Writer logFile) {
         @SuppressWarnings("CollectionWithoutInitialCapacity")
         final List<AddressNode> matchedRuianNodes = new ArrayList<>();
 
@@ -364,6 +366,12 @@ public class AddressNodesMatcher {
         }
 
         if (minDistance > matchMaxDistance) {
+            Utils.printToLog(logFile, MessageFormat.format("Matched RÚIAN node "
+                    + "{0} and OSM node {1} but their distance "
+                    + "{2,number,#.#######} is over the limit "
+                    + "{3,number,#.#######}", matchedRuianNode.getAddressInfo(),
+                    osmNode.getAddressInfo(), minDistance, matchMaxDistance));
+
             return null;
         }
 
