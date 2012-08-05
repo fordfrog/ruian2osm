@@ -98,6 +98,11 @@ public class RuianLoader {
                     final PGgeometry geom = (PGgeometry) rs.getObject("point");
                     final Point point =
                             (Point) (geom == null ? null : geom.getGeometry());
+
+                    if (point != null) {
+                        Utils.roundPoint(point);
+                    }
+
                     final String conscriptionNumber =
                             rs.getString("cislo_domovni");
                     final String streetNumberValue =

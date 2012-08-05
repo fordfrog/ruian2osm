@@ -23,9 +23,12 @@ package com.fordfrog.ruian2osm;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.SQLException;
 import java.text.MessageFormat;
 import org.postgis.PGbox2d;
+import org.postgis.Point;
 
 /**
  * Various utility methods.
@@ -76,5 +79,30 @@ public class Utils {
         } catch (final SQLException ex) {
             throw new RuntimeException("Failed to create PGbox2d", ex);
         }
+    }
+
+    /**
+     * Rounds point coordinates to 7 digits.
+     *
+     * @param point
+     */
+    public static void roundPoint(final Point point) {
+        point.x = round(point.x, 7);
+        point.y = round(point.y, 7);
+    }
+
+    /**
+     * Rounds double value to specified scale.
+     *
+     * @param value double value
+     * @param scale scale
+     *
+     * @return rounded double value
+     */
+    public static double round(final double value, final int scale) {
+        BigDecimal bigDecimal = new BigDecimal(value);
+        bigDecimal = bigDecimal.setScale(scale, RoundingMode.HALF_UP);
+
+        return bigDecimal.doubleValue();
     }
 }

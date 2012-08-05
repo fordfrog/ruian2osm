@@ -58,7 +58,7 @@ public class AddressNodesMatcher {
             final List<AddressNode> osmNodes, final double matchMaxDistance,
             final Writer logFile) {
         Utils.printToLog(logFile, MessageFormat.format("Maximum allowed "
-                + "distance for matching two nodes is {0,number,#.##########}",
+                + "distance for matching two nodes is {0,number,#.#######}",
                 matchMaxDistance));
 
         final List<AddressNode> ruianLeftNodes = new ArrayList<>(ruianNodes);
@@ -349,13 +349,13 @@ public class AddressNodesMatcher {
         }
 
         AddressNode matchedRuianNode = matchedRuianNodes.get(0);
-        double minDistance =
-                matchedRuianNode.getPoint().distance(osmNode.getPoint());
+        double minDistance = Utils.round(
+                matchedRuianNode.getPoint().distance(osmNode.getPoint()), 7);
 
         for (int j = 1; j < matchedRuianNodes.size(); j++) {
             final AddressNode ruianNode = matchedRuianNodes.get(j);
-            final double curDistance =
-                    ruianNode.getPoint().distance(osmNode.getPoint());
+            final double curDistance = Utils.round(
+                    ruianNode.getPoint().distance(osmNode.getPoint()), 7);
 
             if (curDistance < minDistance) {
                 matchedRuianNode = ruianNode;

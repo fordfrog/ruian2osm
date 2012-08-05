@@ -79,8 +79,8 @@ public class StatsPrinter {
                     matchedRuianDeleted++;
                 }
 
-                final double distance =
-                        osmNode.getPoint().distance(ruianNode.getPoint());
+                final double distance = Utils.round(
+                        osmNode.getPoint().distance(ruianNode.getPoint()), 7);
                 totalDistance += distance;
 
                 if (minDistance == null || distance < minDistance) {
@@ -116,17 +116,15 @@ public class StatsPrinter {
                 + "nodes: {0} ({1} of these are marked as deleted)",
                 notMatchedRuianCount, notMatchedRuianDeletedCount));
         Utils.printToLog(logFile, MessageFormat.format(
-                "Total unmatched RÚIAN nodes: {0}", notMatchedRuianCount));
-        Utils.printToLog(logFile, MessageFormat.format(
-                "Average matched node distance: {0,number,#.##########}",
+                "Average matched node distance: {0,number,#.#######}",
                 totalDistance / matchedCount));
         Utils.printToLog(logFile, MessageFormat.format(
-                "Minimum matched node distance: {0,number,#.##########} "
+                "Minimum matched node distance: {0,number,#.#######} "
                 + "(RÚIAN: {1} OSM: {2})", minDistance,
                 minDistancePair.getRuian().getAddressInfo(),
                 minDistancePair.getOsm().getAddressInfo()));
         Utils.printToLog(logFile, MessageFormat.format(
-                "Maximum matched node distance: {0,number,#.##########} "
+                "Maximum matched node distance: {0,number,#.#######} "
                 + "(RÚIAN: {1} OSM: {2})", maxDistance,
                 maxDistancePair.getRuian().getAddressInfo(),
                 maxDistancePair.getOsm().getAddressInfo()));
@@ -157,11 +155,11 @@ public class StatsPrinter {
             if (ruianPoint == null) {
                 distance = null;
             } else {
-                distance = ruianPoint.distance(osmPoint);
+                distance = Utils.round(ruianPoint.distance(osmPoint), 7);
             }
 
             Utils.printToLog(logFile, MessageFormat.format(
-                    "RÚIAN: {0} OSM: {1} (distance: {2,number,#.#########})",
+                    "RÚIAN: {0} OSM: {1} (distance: {2,number,#.#######})",
                     pair.getRuian().getAddressInfo(),
                     pair.getOsm().getAddressInfo(), distance));
         }
