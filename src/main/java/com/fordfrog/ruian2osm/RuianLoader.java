@@ -101,6 +101,7 @@ public class RuianLoader {
 
                     if (point != null) {
                         Utils.roundPoint(point);
+                        point.srid = -1;
                     }
 
                     final String conscriptionNumber =
