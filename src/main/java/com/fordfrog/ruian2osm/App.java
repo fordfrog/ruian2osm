@@ -31,6 +31,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.SQLException;
+import java.text.MessageFormat;
 import java.util.Objects;
 import org.postgis.PGbox2d;
 
@@ -64,8 +65,13 @@ public class App {
             switch (args[i]) {
                 case "--bbox":
                     i++;
+
+                    final String[] parts = args[i].split(",");
+
                     try {
-                        bbox = new PGbox2d("SRID=4326;" + args[i]);
+                        bbox = new PGbox2d(MessageFormat.format(
+                                "SRID=4326;BOX({0} {1},{2} {3})",
+                                (Object[]) parts));
                     } catch (final SQLException ex) {
                         throw new RuntimeException(
                                 "Bounding box is not valid", ex);
