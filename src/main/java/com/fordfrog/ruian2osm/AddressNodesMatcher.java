@@ -58,8 +58,8 @@ public class AddressNodesMatcher {
             final List<AddressNode> osmNodes, final double matchMaxDistance,
             final Writer logFile) {
         Utils.printToLog(logFile, MessageFormat.format("Maximum allowed "
-                + "distance for matching two nodes is {0}",
-                Double.toString(matchMaxDistance)));
+                + "distance for matching two nodes is {0,number,#.##########}",
+                matchMaxDistance));
 
         final List<AddressNode> ruianLeftNodes = new ArrayList<>(ruianNodes);
         final List<AddressNode> osmLeftNodes = new ArrayList<>(osmNodes);

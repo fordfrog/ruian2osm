@@ -70,6 +70,10 @@ public class Processor {
                     RuianLoader.loadNodes(bbox, con, logFile);
             final List<AddressNodePair> pairs = AddressNodesMatcher.matchNodes(
                     ruianNodes, osmNodes, matchMaxDistance, logFile);
+
+            if (printStats) {
+                StatsPrinter.printStats(pairs, logFile);
+            }
         } catch (final SQLException ex) {
             throw new RuntimeException(
                     "Problem occurred while communicating with database", ex);

@@ -291,4 +291,24 @@ public class AddressNode extends Node {
             getTags().put("ref:ruian", refRuian);
         }
     }
+
+    /**
+     * Returns address information.
+     *
+     * @return address information
+     */
+    public String getAddressInfo() {
+        final StringBuilder sbString = new StringBuilder(100);
+        sbString.append(getPoint());
+        sbString.append(' ');
+        sbString.append(getCountry());
+        sbString.append(", ");
+        sbString.append(getCity());
+        sbString.append(", ");
+        sbString.append(getStreet());
+        sbString.append(' ');
+        sbString.append(getHouseNumber());
+
+        return sbString.toString();
+    }
 }
