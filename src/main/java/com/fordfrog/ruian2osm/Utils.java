@@ -50,6 +50,7 @@ public class Utils {
         try {
             logFile.write(message);
             logFile.write('\n');
+            logFile.flush();
         } catch (final IOException ex) {
             throw new RuntimeException("Failed to write to log", ex);
         }
