@@ -80,6 +80,14 @@ public class AddressNodesMatcher {
                 + "- RÚIAN: {0}, OSM: {1}", ruianLeftNodes.size(),
                 osmLeftNodes.size()));
 
+        for (final AddressNode node : ruianLeftNodes) {
+            result.add(new AddressNodePair(node, null));
+        }
+
+        for (final AddressNode node : osmLeftNodes) {
+            result.add(new AddressNodePair(null, node));
+        }
+
         return result;
     }
 
