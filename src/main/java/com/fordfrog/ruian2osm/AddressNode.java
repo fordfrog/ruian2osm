@@ -326,6 +326,8 @@ public class AddressNode extends Node {
         sbString.append(' ');
         sbString.append(getCountry());
         sbString.append(", ");
+        sbString.append(getPostCode());
+        sbString.append(' ');
         sbString.append(getCity());
         sbString.append(", ");
         sbString.append(getStreet());
