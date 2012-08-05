@@ -56,10 +56,10 @@ public class OsmLoader {
      *
      * @return loaded nodes
      */
-    public static List<Node> loadNodes(final PGbox2d bbox,
+    public static List<AddressNode> loadNodes(final PGbox2d bbox,
             final Writer logFile) {
         @SuppressWarnings("CollectionWithoutInitialCapacity")
-        final List<Node> nodes = new ArrayList<>();
+        final List<AddressNode> nodes = new ArrayList<>();
         @SuppressWarnings("CollectionWithoutInitialCapacity")
         final List<Integer> loadedIds = new ArrayList<>();
 
@@ -109,7 +109,7 @@ public class OsmLoader {
      * @param loadedIds list of node ids that were already loaded
      * @param url       download URL
      */
-    private static void loadNodes(final List<Node> nodes,
+    private static void loadNodes(final List<AddressNode> nodes,
             final List<Integer> loadedIds, final URL url) {
         try (final InputStream inputStream = url.openStream()) {
             final XMLInputFactory xMLInputFactory =
@@ -148,7 +148,7 @@ public class OsmLoader {
      * @throws XMLStreamException Thrown if problem occurred while reading XML
      *                            stream.
      */
-    private static void loadNodesOsm(final List<Node> nodes,
+    private static void loadNodesOsm(final List<AddressNode> nodes,
             final List<Integer> loadedIds, final XMLStreamReader reader)
             throws XMLStreamException {
         while (reader.hasNext()) {
@@ -199,10 +199,10 @@ public class OsmLoader {
      * @throws XMLStreamException Thrown if problem occurred while reading XML
      *                            stream.
      */
-    private static void loadNode(final List<Node> nodes,
+    private static void loadNode(final List<AddressNode> nodes,
             final List<Integer> loadedIds, final XMLStreamReader reader)
             throws XMLStreamException {
-        final Node node = new Node();
+        final AddressNode node = new AddressNode();
 
         final Point point = new Point(
                 Double.parseDouble(reader.getAttributeValue(null, "lon")),
