@@ -134,4 +134,26 @@ public class Node {
     public Map<String, String> getTags() {
         return tags;
     }
+
+    /**
+     * Returns value of bot:ruian tag.
+     *
+     * @return value of bot:ruian tag
+     */
+    public String getBotRuian() {
+        return getTags().get("bot:ruian");
+    }
+
+    /**
+     * Sets value of value of bot:ruian tag.
+     *
+     * @param botRuian new value
+     */
+    public void setBotRuian(final String botRuian) {
+        if (botRuian == null || botRuian.trim().isEmpty()) {
+            getTags().remove("bot:ruian");
+        } else {
+            getTags().put("bot:ruian", botRuian.trim());
+        }
+    }
 }
