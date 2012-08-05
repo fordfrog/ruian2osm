@@ -1,5 +1,6 @@
 Usage: java -jar ruian2osm-*-jar-with-dependencies.jar --db-connection-url <value>
-    [--bbox <value>] [--print-stats] [--update] [--log-file <value>]
+    [--bbox <value>] [--match-max-distance <value>] [--print-stats] [--update]
+    [--log-file <value>]
 
 Where:
 --bbox
@@ -11,6 +12,9 @@ Where:
 --log-file
         is optional specification of log file (if not specified, log will be
         output to console)
+--match-max-distance
+        maximum distance (in EPSG:4326) that should be accepted for matching two
+        address points
 --print-stats
         prints statistic about differences between RÚIAN data and OSM data
 --update

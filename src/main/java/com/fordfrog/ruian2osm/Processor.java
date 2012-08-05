@@ -48,15 +48,17 @@ public class Processor {
     /**
      * Processes the input parameters.
      *
-     * @param dbConnectionUrl database connection URL
-     * @param bbox            bounding box (can be null)
-     * @param printStats      whether statistics should be printed
-     * @param update          whether OSM data update should be performed
-     * @param logFile         log file
+     * @param dbConnectionUrl  database connection URL
+     * @param bbox             bounding box (can be null)
+     * @param printStats       whether statistics should be printed
+     * @param update           whether OSM data update should be performed
+     * @param matchMaxDistance maximum distance for which to accept address
+     *                         nodes match
+     * @param logFile          log file
      */
     public static void process(final String dbConnectionUrl, final PGbox2d bbox,
             final boolean printStats, final boolean update,
-            final Writer logFile) {
+            final double matchMaxDistance, final Writer logFile) {
         try (final Connection con =
                         createConnection(dbConnectionUrl, logFile)) {
             final PGbox2d useBBox = bbox == null ? getBBox(con) : bbox;
@@ -66,6 +68,8 @@ public class Processor {
                     OsmLoader.loadNodes(useBBox, logFile);
             final List<AddressNode> ruianNodes =
                     RuianLoader.loadNodes(bbox, con, logFile);
+            final List<AddressNodePair> pairs = AddressNodesMatcher.matchNodes(
+                    ruianNodes, osmNodes, matchMaxDistance, logFile);
         } catch (final SQLException ex) {
             throw new RuntimeException(
                     "Problem occurred while communicating with database", ex);

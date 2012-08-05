@@ -60,6 +60,7 @@ public class App {
         boolean printStats = false;
         PGbox2d bbox = null;
         Path logFilePath = null;
+        double matchMaxDistance = 0.005;
 
         for (int i = 0; i < args.length; i++) {
             switch (args[i]) {
@@ -86,6 +87,10 @@ public class App {
                     i++;
                     logFilePath = Paths.get(args[i]);
                     break;
+                case "--match-max-distance":
+                    i++;
+                    matchMaxDistance = Double.parseDouble(args[i]);
+                    break;
                 case "--print-stats":
                     printStats = true;
                     break;
@@ -106,8 +111,8 @@ public class App {
                 final Writer logFile = new OutputStreamWriter(
                         logFilePath == null ? System.out
                         : Files.newOutputStream(logFilePath), "UTF-8")) {
-            Processor.process(
-                    dbConnectionUrl, bbox, printStats, update, logFile);
+            Processor.process(dbConnectionUrl, bbox, printStats, update,
+                    matchMaxDistance, logFile);
         } catch (final IOException ex) {
             throw new RuntimeException("Failed to create log writer", ex);
         }
