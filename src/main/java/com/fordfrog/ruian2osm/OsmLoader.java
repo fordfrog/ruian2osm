@@ -39,12 +39,12 @@ import org.postgis.PGbox2d;
  *
  * @author fordfrog
  */
-public class Loader {
+public class OsmLoader {
 
     /**
-     * Creates new instance of Loader.
+     * Creates new instance of OsmLoader.
      */
-    private Loader() {
+    private OsmLoader() {
     }
 
     /**

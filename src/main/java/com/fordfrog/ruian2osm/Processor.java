@@ -61,7 +61,7 @@ public class Processor {
             final PGbox2d useBBox = bbox == null ? getBBox(con) : bbox;
             Utils.printToLog(logFile,
                     MessageFormat.format("Using bounding box {0}", useBBox));
-            Loader.loadNodes(useBBox, logFile);
+            OsmLoader.loadNodes(useBBox, logFile);
         } catch (final SQLException ex) {
             throw new RuntimeException(
                     "Problem occurred while communicating with database", ex);
