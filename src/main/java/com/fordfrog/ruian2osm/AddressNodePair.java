@@ -89,4 +89,18 @@ public class AddressNodePair {
     public void setOsm(final AddressNode osm) {
         this.osm = osm;
     }
+
+    /**
+     * Returns distance between the nodes.
+     *
+     * @return distance or null
+     */
+    public Double getDistance() {
+        if (osm == null || ruian == null || osm.getPoint() == null
+                || ruian.getPoint() == null) {
+            return null;
+        }
+
+        return Utils.round(osm.getPoint().distance(ruian.getPoint()), 7);
+    }
 }

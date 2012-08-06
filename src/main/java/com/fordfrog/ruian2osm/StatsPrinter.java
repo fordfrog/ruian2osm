@@ -26,7 +26,6 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import org.postgis.Point;
 
 /**
  * Prints statistics about matching nodes.
@@ -52,6 +51,8 @@ public class StatsPrinter {
             final Writer logFile) {
         Utils.printToLog(logFile, "Generating statistics...");
 
+        final List<AddressNodePair> changedCityList = new ArrayList<>();
+        final List<AddressNodePair> changedStreetList = new ArrayList<>();
         final List<AddressNode> notMatchedOsm = new ArrayList<>();
         final List<AddressNode> notMatchedRuian = new ArrayList<>();
         final List<AddressNodePair> matchedPairs =
@@ -95,6 +96,18 @@ public class StatsPrinter {
                 }
 
                 histogramContainer.addCount((int) Math.ceil(distance * 100000));
+
+                if (osmNode.getCity() != null
+                        && !ruianNode.getCity().equals(osmNode.getCity())) {
+                    changedCityList.add(pair);
+                }
+
+                if (ruianNode.getStreet() == null ? osmNode.getStreet() != null
+                        : !ruianNode.getStreet().
+                        equalsIgnoreCase(osmNode.getStreet())) {
+                    changedStreetList.add(pair);
+                }
+
             } else if (osmNode != null) {
                 notMatchedOsmCount++;
                 notMatchedOsm.add(osmNode);
@@ -145,6 +158,8 @@ public class StatsPrinter {
         Collections.sort(notMatchedRuian, new AddressNodeComparator());
         Collections.sort(notMatchedOsm, new AddressNodeComparator());
         Collections.sort(matchedPairs, new AddressNodePairComparator());
+        Collections.sort(changedCityList, new AddressNodePairComparator());
+        Collections.sort(changedStreetList, new AddressNodePairComparator());
 
         Utils.printToLog(logFile, "Not matched RÚIAN addresses:");
 
@@ -161,20 +176,30 @@ public class StatsPrinter {
         Utils.printToLog(logFile, "Matched addresses:");
 
         for (final AddressNodePair pair : matchedPairs) {
-            final Point ruianPoint = pair.getRuian().getPoint();
-            final Point osmPoint = pair.getOsm().getPoint();
-            final Double distance;
-
-            if (ruianPoint == null) {
-                distance = null;
-            } else {
-                distance = Utils.round(ruianPoint.distance(osmPoint), 7);
-            }
-
             Utils.printToLog(logFile, MessageFormat.format(
                     "RÚIAN: {0} OSM: {1} (distance: {2,number,#.#######})",
                     pair.getRuian().getAddressInfo(),
-                    pair.getOsm().getAddressInfo(), distance));
+                    pair.getOsm().getAddressInfo(), pair.getDistance()));
+        }
+
+        Utils.printToLog(logFile, "Addresses where city differs "
+                + "(excluding cases where OSM node city is not set):");
+
+        for (final AddressNodePair pair : changedCityList) {
+            Utils.printToLog(logFile, MessageFormat.format(
+                    "RÚIAN: {0} OSM: {1} (distance: {2,number,#.#######})",
+                    pair.getRuian().getAddressInfo(),
+                    pair.getOsm().getAddressInfo(), pair.getDistance()));
+        }
+
+        Utils.printToLog(logFile, "Addresses where street differs (comparison "
+                + "is case insensitive):");
+
+        for (final AddressNodePair pair : changedStreetList) {
+            Utils.printToLog(logFile, MessageFormat.format(
+                    "RÚIAN: {0} OSM: {1} (distance: {2,number,#.#######})",
+                    pair.getRuian().getAddressInfo(),
+                    pair.getOsm().getAddressInfo(), pair.getDistance()));
         }
     }
 }
