@@ -56,6 +56,7 @@ public class StatsPrinter {
         final List<AddressNode> notMatchedRuian = new ArrayList<>();
         final List<AddressNodePair> matchedPairs =
                 new ArrayList<>(pairs.size());
+        final HistogramContainer histogramContainer = new HistogramContainer();
         int matchedCount = 0;
         int matchedRuianDeleted = 0;
         int notMatchedRuianCount = 0;
@@ -92,6 +93,8 @@ public class StatsPrinter {
                     maxDistance = distance;
                     maxDistancePair = pair;
                 }
+
+                histogramContainer.addCount((int) Math.ceil(distance * 100000));
             } else if (osmNode != null) {
                 notMatchedOsmCount++;
                 notMatchedOsm.add(osmNode);
@@ -128,6 +131,16 @@ public class StatsPrinter {
                 + "(RÚIAN: {1} OSM: {2})", maxDistance,
                 maxDistancePair.getRuian().getAddressInfo(),
                 maxDistancePair.getOsm().getAddressInfo()));
+
+        Utils.printToLog(logFile,
+                "Histogram of distances between matched RÚIAN and OSM nodes:");
+
+        for (int i = 0; i < histogramContainer.getCounts().length; i++) {
+            Utils.printToLog(logFile, MessageFormat.format(
+                    "{0,number,0.00000} - {1,number,0.00000}: {2}",
+                    i * 0.00001, (i + 1) * 0.00001,
+                    histogramContainer.getCounts()[i]));
+        }
 
         Collections.sort(notMatchedRuian, new AddressNodeComparator());
         Collections.sort(notMatchedOsm, new AddressNodeComparator());
