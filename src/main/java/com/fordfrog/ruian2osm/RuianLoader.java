@@ -131,13 +131,13 @@ public class RuianLoader {
 
                     switch (rs.getInt("typ_kod")) {
                         case 1:
-                            node.setProvisionalNumber(conscriptionNumber);
+                            node.setConscriptionNumber(conscriptionNumber);
                             node.setHouseNumber(conscriptionNumber
                                     + (streetNumber == null ? "" : '/'
                                     + streetNumber));
                             break;
                         case 2:
-                            node.setConscriptionNumber(conscriptionNumber);
+                            node.setProvisionalNumber(conscriptionNumber);
                             node.setHouseNumber("ev." + conscriptionNumber);
                             break;
                     }
