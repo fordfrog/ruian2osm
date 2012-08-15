@@ -66,7 +66,8 @@ public class AddressNodesMatcher {
         final List<AddressNodePair> result =
                 new ArrayList<>(Math.max(ruianNodes.size(), osmNodes.size()));
 
-        matchByRuianId(result, ruianLeftNodes, osmLeftNodes, logFile);
+        matchByRuianId(result, ruianLeftNodes, osmLeftNodes, matchMaxDistance,
+                logFile);
         matchByFullAddress(result, ruianLeftNodes, osmLeftNodes,
                 matchMaxDistance, logFile);
         matchByStreet(result, ruianLeftNodes, osmLeftNodes, matchMaxDistance,
@@ -94,42 +95,68 @@ public class AddressNodesMatcher {
     /**
      * Matches nodes by RÚIAN id.
      *
-     * @param result         list of result pairs
-     * @param ruianLeftNodes unresolved RÚIAN nodes
-     * @param osmLeftNodes   unresolved OSM nodes
-     * @param logFile        log file writer
+     * @param result           list of result pairs
+     * @param ruianLeftNodes   unresolved RÚIAN nodes
+     * @param osmLeftNodes     unresolved OSM nodes
+     * @param matchMaxDistance maximum distance that is allowed for matching two
+     *                         nodes
+     * @param logFile          log file writer
      */
     private static void matchByRuianId(List<AddressNodePair> result,
             List<AddressNode> ruianLeftNodes,
-            List<AddressNode> osmLeftNodes, final Writer logFile) {
+            List<AddressNode> osmLeftNodes, final double matchMaxDistance,
+            final Writer logFile) {
         Utils.printToLog(logFile, "Matching nodes by RÚIAN id...");
 
-        final Map<String, AddressNode> ruianIdMap =
-                new HashMap<>(ruianLeftNodes.size());
+        final Map<String, List<AddressNode>> osmIdMap =
+                new HashMap<>(osmLeftNodes.size());
 
-        for (final AddressNode node : ruianLeftNodes) {
-            ruianIdMap.put(node.getRefRuian(), node);
+        for (final AddressNode node : osmLeftNodes) {
+            if (node.getRefRuian() == null || node.getRefRuian().isEmpty()) {
+                continue;
+            }
+
+            List<AddressNode> list = osmIdMap.get(node.getRefRuian());
+
+            if (list == null) {
+                list = new ArrayList<>(2);
+                osmIdMap.put(node.getRefRuian(), list);
+            }
+
+            list.add(node);
+        }
+
+        if (osmIdMap.isEmpty()) {
+            Utils.printToLog(
+                    logFile, "None of the OSM nodes contains RÚIAN id");
+
+            return;
         }
 
         int count = 0;
 
-        for (int i = osmLeftNodes.size() - 1; i >= 0; i--) {
-            final AddressNode osmNode = osmLeftNodes.get(i);
+        for (int i = ruianLeftNodes.size() - 1; i >= 0; i--) {
+            final AddressNode ruianNode = ruianLeftNodes.get(i);
 
-            if (osmNode.getRefRuian() == null) {
+            final List<AddressNode> osmNodes =
+                    osmIdMap.get(ruianNode.getRefRuian());
+
+            if (osmNodes == null) {
                 continue;
             }
 
-            final AddressNode ruianNode = ruianIdMap.get(osmNode.getRefRuian());
-
-            if (ruianNode == null) {
-                continue;
-            }
+            final AddressNode osmNode = getClosestNode(ruianNode, osmNodes,
+                    matchMaxDistance, logFile);
 
             result.add(new AddressNodePair(ruianNode, osmNode));
-            osmLeftNodes.remove(i);
-            ruianLeftNodes.remove(ruianNode);
-            ruianIdMap.remove(ruianNode.getRefRuian());
+            ruianLeftNodes.remove(i);
+            osmLeftNodes.remove(osmNode);
+            osmNodes.remove(osmNode);
+
+            if (osmNodes.isEmpty()) {
+                osmIdMap.remove(osmNode.getRefRuian());
+            }
+
             count++;
         }
 
@@ -156,16 +183,20 @@ public class AddressNodesMatcher {
         Utils.printToLog(logFile, "Matching nodes by full address...");
 
         // maps city, street, address nodes
-        final Map<String, Map<String, List<AddressNode>>> ruianMap =
+        final Map<String, Map<String, List<AddressNode>>> osmMap =
                 new HashMap<>();
 
-        for (final AddressNode node : ruianLeftNodes) {
+        for (final AddressNode node : osmLeftNodes) {
+            if (node.getCity() == null || node.getCity().isEmpty()) {
+                continue;
+            }
+
             Map<String, List<AddressNode>> streets =
-                    ruianMap.get(node.getCity());
+                    osmMap.get(node.getCity());
 
             if (streets == null) {
                 streets = new HashMap<>();
-                ruianMap.put(node.getCity(), streets);
+                osmMap.put(node.getCity(), streets);
             }
 
             List<AddressNode> nodes = streets.get(node.getStreet());
@@ -178,39 +209,54 @@ public class AddressNodesMatcher {
             nodes.add(node);
         }
 
+        if (osmMap.isEmpty()) {
+            Utils.printToLog(logFile, "None of the OSM nodes contains city");
+
+            return;
+        }
+
         int count = 0;
 
-        for (int i = osmLeftNodes.size() - 1; i >= 0; i--) {
-            final AddressNode osmNode = osmLeftNodes.get(i);
+        for (int i = ruianLeftNodes.size() - 1; i >= 0; i--) {
+            final AddressNode ruianNode = ruianLeftNodes.get(i);
 
             final Map<String, List<AddressNode>> streets =
-                    ruianMap.get(osmNode.getCity());
+                    osmMap.get(ruianNode.getCity());
 
             if (streets == null) {
                 continue;
             }
 
-            final List<AddressNode> nodes = streets.get(osmNode.getStreet());
+            final List<AddressNode> nodes = streets.get(ruianNode.getStreet());
 
             if (nodes == null) {
                 continue;
             }
 
-            if (osmNode.getRefRuian() == null) {
+            if (ruianNode.getRefRuian() == null) {
                 continue;
             }
 
-            final AddressNode matchedRuianNode = getClosestNodeByNumber(
-                    osmNode, nodes, matchMaxDistance, logFile);
+            final AddressNode matchedOsmNode = getClosestNodeByNumber(
+                    ruianNode, nodes, matchMaxDistance, logFile);
 
-            if (matchedRuianNode == null) {
+            if (matchedOsmNode == null) {
                 continue;
             }
 
-            result.add(new AddressNodePair(matchedRuianNode, osmNode));
-            osmLeftNodes.remove(i);
-            ruianLeftNodes.remove(matchedRuianNode);
-            nodes.remove(matchedRuianNode);
+            result.add(new AddressNodePair(ruianNode, matchedOsmNode));
+            ruianLeftNodes.remove(i);
+            osmLeftNodes.remove(matchedOsmNode);
+            nodes.remove(matchedOsmNode);
+
+            if (nodes.isEmpty()) {
+                streets.remove(ruianNode.getStreet());
+
+                if (streets.isEmpty()) {
+                    osmMap.remove(ruianNode.getCity());
+                }
+            }
+
             count++;
         }
 
@@ -235,14 +281,14 @@ public class AddressNodesMatcher {
             final Writer logFile) {
         Utils.printToLog(logFile, "Matching nodes by street...");
 
-        final Map<String, List<AddressNode>> ruianMap = new HashMap<>();
+        final Map<String, List<AddressNode>> osmMap = new HashMap<>();
 
-        for (final AddressNode node : ruianLeftNodes) {
-            List<AddressNode> nodes = ruianMap.get(node.getStreet());
+        for (final AddressNode node : osmLeftNodes) {
+            List<AddressNode> nodes = osmMap.get(node.getStreet());
 
             if (nodes == null) {
                 nodes = new ArrayList<>();
-                ruianMap.put(node.getStreet(), nodes);
+                osmMap.put(node.getStreet(), nodes);
             }
 
             nodes.add(node);
@@ -250,26 +296,31 @@ public class AddressNodesMatcher {
 
         int count = 0;
 
-        for (int i = osmLeftNodes.size() - 1; i >= 0; i--) {
-            final AddressNode osmNode = osmLeftNodes.get(i);
+        for (int i = ruianLeftNodes.size() - 1; i >= 0; i--) {
+            final AddressNode ruianNode = ruianLeftNodes.get(i);
 
-            final List<AddressNode> nodes = ruianMap.get(osmNode.getStreet());
+            final List<AddressNode> nodes = osmMap.get(ruianNode.getStreet());
 
             if (nodes == null) {
                 continue;
             }
 
-            final AddressNode matchedRuianNode = getClosestNodeByNumber(
-                    osmNode, nodes, matchMaxDistance, logFile);
+            final AddressNode matchedOsmNode = getClosestNodeByNumber(
+                    ruianNode, nodes, matchMaxDistance, logFile);
 
-            if (matchedRuianNode == null) {
+            if (matchedOsmNode == null) {
                 continue;
             }
 
-            result.add(new AddressNodePair(matchedRuianNode, osmNode));
-            osmLeftNodes.remove(i);
-            ruianLeftNodes.remove(matchedRuianNode);
-            nodes.remove(matchedRuianNode);
+            result.add(new AddressNodePair(ruianNode, matchedOsmNode));
+            ruianLeftNodes.remove(i);
+            osmLeftNodes.remove(matchedOsmNode);
+            nodes.remove(matchedOsmNode);
+
+            if (nodes.isEmpty()) {
+                osmMap.remove(ruianNode.getStreet());
+            }
+
             count++;
         }
 
@@ -296,19 +347,19 @@ public class AddressNodesMatcher {
 
         int count = 0;
 
-        for (int i = osmLeftNodes.size() - 1; i >= 0; i--) {
-            final AddressNode osmNode = osmLeftNodes.get(i);
+        for (int i = ruianLeftNodes.size() - 1; i >= 0; i--) {
+            final AddressNode ruianNode = ruianLeftNodes.get(i);
 
-            final AddressNode matchedRuianNode = getClosestNodeByNumber(
-                    osmNode, ruianLeftNodes, matchMaxDistance, logFile);
+            final AddressNode matchedOsmNode = getClosestNodeByNumber(
+                    ruianNode, osmLeftNodes, matchMaxDistance, logFile);
 
-            if (matchedRuianNode == null) {
+            if (matchedOsmNode == null) {
                 continue;
             }
 
-            result.add(new AddressNodePair(matchedRuianNode, osmNode));
-            osmLeftNodes.remove(i);
-            ruianLeftNodes.remove(matchedRuianNode);
+            result.add(new AddressNodePair(ruianNode, matchedOsmNode));
+            ruianLeftNodes.remove(i);
+            osmLeftNodes.remove(matchedOsmNode);
             count++;
         }
 
@@ -317,24 +368,24 @@ public class AddressNodesMatcher {
     }
 
     /**
-     * Compares OSM node conscription/provisional number to the RÚIAN nodes and
+     * Compares RÚIAN node conscription/provisional number to the OSM nodes and
      * returns the closest one that matches by any of the numbers, unless it is
      * more distant than maximum allowed distance for matching.
      *
-     * @param osmNode          OSM node
-     * @param ruianNodes       list of RÚIAN nodes
+     * @param ruianNode        RÚIAN node
+     * @param osmNodes         list of OSM nodes
      * @param matchMaxDistance maximum allowed distance for matching
      * @param logFile          log file writer
      *
-     * @return matched RÚIAN node or null
+     * @return matched OSM node or null
      */
-    private static AddressNode getClosestNodeByNumber(final AddressNode osmNode,
-            final List<AddressNode> ruianNodes, final double matchMaxDistance,
-            final Writer logFile) {
+    private static AddressNode getClosestNodeByNumber(
+            final AddressNode ruianNode, final List<AddressNode> osmNodes,
+            final double matchMaxDistance, final Writer logFile) {
         @SuppressWarnings("CollectionWithoutInitialCapacity")
-        final List<AddressNode> matchedRuianNodes = new ArrayList<>();
+        final List<AddressNode> matchedOsmNodes = new ArrayList<>();
 
-        for (final AddressNode ruianNode : ruianNodes) {
+        for (final AddressNode osmNode : osmNodes) {
             if (ruianNode.getHouseNumber().equals(osmNode.getHouseNumber())
                     || ruianNode.getConscriptionNumber() != null
                     && ruianNode.getConscriptionNumber().
@@ -342,39 +393,63 @@ public class AddressNodesMatcher {
                     || ruianNode.getProvisionalNumber() != null
                     && ruianNode.getProvisionalNumber().
                     equals(osmNode.getProvisionalNumber())) {
-                matchedRuianNodes.add(ruianNode);
+                matchedOsmNodes.add(osmNode);
             }
         }
 
-        if (matchedRuianNodes.isEmpty()) {
+        if (matchedOsmNodes.isEmpty()) {
             return null;
         }
 
-        AddressNode matchedRuianNode = matchedRuianNodes.get(0);
-        double minDistance = Utils.round(
-                matchedRuianNode.getPoint().distance(osmNode.getPoint()), 7);
+        return getClosestNode(
+                ruianNode, matchedOsmNodes, matchMaxDistance, logFile);
+    }
 
-        for (int j = 1; j < matchedRuianNodes.size(); j++) {
-            final AddressNode ruianNode = matchedRuianNodes.get(j);
-            final double curDistance = Utils.round(
-                    ruianNode.getPoint().distance(osmNode.getPoint()), 7);
+    /**
+     * Finds the closest OSM node in the list for the specified RÚIAN node.
+     *
+     * @param ruianNode        RÚIAN node
+     * @param osmNodes         list of OSM nodes
+     * @param matchMaxDistance maximum allowed distance for matching nodes
+     * @param logFile          log file writer
+     *
+     * @return the closest node
+     */
+    private static AddressNode getClosestNode(final AddressNode ruianNode,
+            final List<AddressNode> osmNodes, final double matchMaxDistance,
+            final Writer logFile) {
+        final AddressNodePair pair = new AddressNodePair();
+        pair.setRuian(ruianNode);
 
-            if (curDistance < minDistance) {
-                matchedRuianNode = ruianNode;
-                minDistance = curDistance;
+        AddressNode minOsmNode = osmNodes.get(0);
+        pair.setOsm(minOsmNode);
+
+        double minDistance = pair.getDistance();
+
+        for (int i = 1; i < osmNodes.size(); i++) {
+            final AddressNode curNode = osmNodes.get(i);
+
+            pair.setOsm(curNode);
+
+            final double distance = pair.getDistance();
+
+            if (distance < minDistance) {
+                minDistance = distance;
+                minOsmNode = curNode;
             }
         }
 
         if (minDistance > matchMaxDistance) {
             Utils.printToLog(logFile, MessageFormat.format("Matched RÚIAN node "
-                    + "{0} and OSM node {1} but their distance "
+                    + "[{0}] and OSM node [{1}] but their distance "
                     + "{2,number,#.#######} is over the limit "
-                    + "{3,number,#.#######}", matchedRuianNode.getAddressInfo(),
-                    osmNode.getAddressInfo(), minDistance, matchMaxDistance));
+                    + "{3,number,#.#######}", ruianNode.getAddressInfo(),
+                    minOsmNode.getAddressInfo(), minDistance,
+                    matchMaxDistance));
 
             return null;
         }
 
-        return matchedRuianNode;
+        return minOsmNode;
     }
 }
